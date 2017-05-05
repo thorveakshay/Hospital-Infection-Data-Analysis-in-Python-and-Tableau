@@ -5,7 +5,7 @@ from com.hospital.data_processing.DbConnection import getConnection, closeConnec
 
 
 def fetch_infection_data():
-    query = "select * from hospital_survey where HCAHPS_measure_id='H_STAR_RATING' and survey_rating not in (0,10)  order by `hospital_name` ASC;"
+    query = "select survey_id,hospital_name,state,HCAHPS_measure_id,survey_rating from hospital_survey where HCAHPS_measure_id='H_STAR_RATING' and survey_rating not in (0,10)  order by `hospital_name` ASC;"
     
     try:
         
@@ -15,22 +15,22 @@ def fetch_infection_data():
         cursor.execute("TRUNCATE TABLE survey_processed_data;")
         db.commit()
         
-        print("Updating infection data into: survey_processed_data Table ")
         cursor.execute(query);
         
         print("Processing #",cursor.rowcount, " Records...")
 
         qSQLresults = cursor.fetchall()
         for row in qSQLresults:
-            id = row[0]
-            hospitalName = row[2] 
-            measureId = row[9] 
-            surveyRating = row[12] 
+            surveyProcessedId = row[0]
+            hospitalName = row[1] 
+            state = row[2]
+            measureId = row[3] 
+            surveyRating = row[4] 
             print("survey rating #",surveyRating)
             
-            cursor.execute('''INSERT into survey_processed_data (`survey_process_id`,`hospital_name`,`HCAHPS_measure_id`,`survey_rating`)
-                  values (%s,%s,%s,%s)''',
-                  (id, hospitalName, measureId,surveyRating))
+            cursor.execute('''INSERT into survey_processed_data (`survey_process_id`,`hospital_name`,`state`,`HCAHPS_measure_id`,`survey_rating`)
+                  values (%s,%s,%s,%s,%s)''',
+                  (surveyProcessedId, hospitalName,state , measureId,surveyRating))
 
             # Commit your changes in the database
             
